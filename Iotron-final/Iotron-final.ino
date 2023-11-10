@@ -1,6 +1,16 @@
 // Code that was used to demonstrate in IOTRON 2.0
 //Code is working fine 
 // Buzzer Pin(13,GND)
+// 4 pin RGB LED (Anode)
+//    Biggest pin     to        3.3V
+//    (End pin adjac  to        9 - Digital (PWM)
+//    -ent to
+//    biggest pin ) 
+//    (middle and     to        10 - Digital (PWM)
+//    adjacent to
+//    biggest pin)
+//    other end pin   to        11 - Digital (PWM)
+
 // Fingerprint Sensor:      
 //    1(red)          to        5V
 //    2(black)        to        GND
@@ -8,7 +18,7 @@
 //    4(green)        to        3 - Digital
 //    5(blue)         to        unconnected
 //    6(white)        to        unconnected
-//
+
 //BT Module Wiring
 //    VCC             to        5V
 //    GND             to        GND
@@ -23,6 +33,10 @@ SoftwareSerial mySerial(2, 3);  // SoftwareSerial for fingerprint sensor
 Adafruit_Fingerprint finger = Adafruit_Fingerprint(&mySerial);
 int buzzerPin = 13;  // Pin connected to the buzzer
 
+int redPin = 9;    // Connect the red pin to digital pin 9
+int greenPin = 10;  // Connect the green pin to digital pin 10
+int bluePin = 11;   // Connect the blue pin to digital pin 11
+
 enum State {
   SETTING,
   MATCHING,
@@ -33,6 +47,10 @@ enum State {
 State currentState = MATCHING;
 
 void setup() {
+  pinMode(redPin, OUTPUT);
+  pinMode(greenPin, OUTPUT);
+  pinMode(bluePin, OUTPUT);
+  setColor(0,0,0);
   Serial.begin(9600);  // Serial monitor
   while (!Serial)
     ;  // Wait for serial connection
@@ -393,13 +411,16 @@ void displaySettings(){
   }
 
 }
-void playMatchedTune() {
+void playNotMatchedTune() {
+  setColor(255, 155, 0);
   tone(buzzerPin, 1000);  // Play a tone for a matched fingerprint
   delay(1000);
   noTone(buzzerPin);
+    setColor(0, 0, 0);
 }
 
-void playNotMatchedTune() {
+void playMatchedTune() {
+  setColor(0, 255, 0);
   tone(buzzerPin, 2000);  // Play a different tone for a not matched fingerprint
   delay(300);
   noTone(buzzerPin);
@@ -407,6 +428,7 @@ void playNotMatchedTune() {
   tone(buzzerPin, 500);  // Play a different tone for a not matched fingerprint
   delay(500);
   noTone(buzzerPin);
+  setColor(0, 0, 0);
 }
 
 void checkBluetoothSerial() {
@@ -429,4 +451,9 @@ void checkBluetoothSerial() {
     // Send any data received from the fingerprint sensor to the Bluetooth terminal
     Serial.write(c);
   }
+}
+void setColor(int redValue, int greenValue, int blueValue) {
+  analogWrite(redPin, 255-redValue);
+  analogWrite(greenPin, 255-greenValue);
+  analogWrite(bluePin, 255-blueValue);
 }
